@@ -1,0 +1,55 @@
+from sqlalchemy import create_engine
+# Responsável por criar sessão de Banco de Dados
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+# (convert_unicode=True) - Não ter problemas de acentuação com banco de dados
+engine = create_engine('sqlite:///atividades.db', convert_unicode=True)
+db_session = scoped_session(sessionmaker(autocommit= False, binds=engine))
+
+# default do Sql Alchemy
+Base = declarative_base()
+Base.query = db_session.query_property()
+
+
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+                                             models.pt
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+# Responsável por criar sessão de Banco de Dados
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship
+from sqlalchemy.ext.declarative import declarative_base
+
+# (convert_unicode=True) - Não ter problemas de acentuação com banco de dados
+engine = create_engine('sqlite:///atividades.db', convert_unicode=True)
+db_session = scoped_session(sessionmaker(autocommit= False, binds=engine))
+
+# default do Sql Alchemy
+Base = declarative_base()
+Base.query = db_session.query_property()
+
+# Nome que vai ficar no banco de dados -> __tablename__ = 'pessoas'  , o nome da classe pode ser diferente. -> class Pessoas(Base):
+class Pessoas(Base):
+    __tablename__ = 'pessoas'
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(40), index=True)  #index=True -> Deixa a consulta mais rápida quando for pelo nome.
+    idade = Column(Integer)
+
+    def __repr__(self):
+        return '<Pessoa {}>'.format(self.nome)
+
+class Atividades (Base):
+    __tablename__ = 'atividades'
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(80))
+# Relacionamento entre pessoas e atividaddes:
+    pessoa_id = Column(Integer, ForeignKey('pessoas.id'))
+    pessoa = relationship("Pessoas")
+
+def init_db():
+    Base.metadata.create_all(bind=engine)  # comando -> create_all, vai criar o banco de dados.
+
+if __name__ == '__main':
+    init_db()
